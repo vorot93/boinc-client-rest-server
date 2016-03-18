@@ -1,0 +1,23 @@
+sudo: required
+language: go
+go:
+- 1.7
+services:
+- docker
+env:
+  global:
+  - secure: "COKWOF5yjZCZz7kubrpz5MNYNhpddYpUQ9L1BGXxPCaN2b/wBCsk9TwtvvChi6YoD8+PBcb8WahR6cCUU0hsrYcj+YhuYNUZMsdSpasQ8UMEcEfTHK0Anvia2Kbj5ug6oIfu5BSgZx0BSrBDgrlw34VZxU8alMFcacZPo1YETaq4F3pxWvA/kNzaxS9pUiPXaFN1qiDtojWjlhl/9dSh2jPaAU8qnLLsZteHFnAfyeF4eZ6upITGnum9YTqrS5MyPLypHdAwZU9FdAnXThZD81aCEIO06U0ZDFPmBsAS92fT4K1rKFVwkWVY2jAGP9ni+6EIu0x3YXKOoJSh2YrCBKprUCiSQM7ZjgA2rEU4q5h1Csv4aJvxc+3CIpOY31uK3yJMFx091xaO/lqPadd6+ZnYHlW+JynnBx/2w5s7h1WcEh3jMQbIhuQfzAa9QUFc0db2hODoFjEY+yEFFiR486kmCR5bY4GinVytIHnpGi0MtRmIvW7w8Rxdq/rSDOTj8ALjW80JjPjWD9vlj3FRMki0dOH/L1xzeb3Xo5p9pHlyTiVp8BgcRhd44hG19u7Cli/A9WlxTAzSZB/fr0heMWwVe+z0qb2J9HFx2xGefe/XAyn+0UrXQH/C8zX05Gh1TAWiE2y/kTh1yNv1vXpH+AkRZ5sf/ZNJFZR7UUl5b6Q=" # DOCKER_EMAIL
+  - secure: "pVRNALI62xWvTXIng0ptlqnY8A3X1PPWn5P6dyjAPkEuS2d7kRo7qgIoOWyDsZt8XD0Pst487+6K2x6VcNjMmwnq/hRL59VuWQoS6lsLdDsJ3ct3OpZsa2bbFdikCZzZwjegNiHA9SsX1fi3vr6T6avf7hggv0yyCSn7QXvHsdQ6rXEqzcAg1WLLplLsYzMi7OhQ7lAIS9RGCrRzsLD91OEzCR6ne54hhKJeu/sIFmGx46VP976aQ19/JmhVa6o8YD2Xy/eQaZGZ5xzMW15SO1uqQeUOChC15Yr2m3DthmAZ1OshpuVebrQsqSUQNQscZyxIaViR/skqxljhgndlqpA1GCI5ZL1dgE2SiTZCx2OLB16A6rEL8L7F/TmgyMCOk74mESDU1K4n3cLNu2tLJiV2r2m6VVIQxAX50dT/5GAxXTxp+BBaZCak2JOUB0CgM+tr9KjqQ1BuUT1cUFxf+0Usp0NBlrw9QTNOolXybXKZiY5cGvBSKOlsT5Yyh9+Wku5xxF+5/fg3B18+A4ZsVzEmuMwD30iDcWIr1z4ZekZI0JSgo+LpMJJVv9JfhLvCI+1COMCehpzT/Vd8fGlJbvnoKTN2gDPsoXkOVn9Z3nRbIdbeUEt6luo24qV6xF4AflxPgwHEPGmIoZkxnMPKC2pvPo+xUs+Ljd5FICKggZQ=" # DOCKER_USER
+  - secure: "CwuArnvoJfHEx1kAfPMaqTBN1zzJEHgLkSgETxXJkkawF2vdTnS4ls5YE2igWJORA2IAof2fFc/bYjNqwanX48N36oONu2W3l9hJdncI5qOCguAEl2IIsBpodZNvedEDeJlGyAmy5PsFww2wgChNCK0aJgh+ueF1krBmw07jeONDoGcmKEzkHoewrpQwxiC8XqLb09bJuQwVopmn1ZavyQep2umxyzv1FVzBwGns56wXXMqnahRmxoVODNA49rStBF2Q6URwPISJa58WAS1bRu7Mo+xJUSsxUQFy0/IfINHtw71XH60nepea8hnP+W5fAbZh6OiDPsCYRj4hZrw8N6Y+kB7lRC4/VRA8WG8T70dQxQAkgJQ4F+nDkKSSKKwmZAiYQIi8lGDTJudMMvWwMDevI2oRBZ12oyIJG0Qt25zBb5JjgdvboswAHS8oL5YYHW/+GikGHEgra29Dvm/e9RnDYthgQ5OpQ1ctoUn8M798xKvX0K3ZthS16a4+AkYMO1eNT1ozD/lIacFtIK4xXxV+CIN0uPkdhKC86Yd7VZEBd4V3jDO6e8nS0o1KJYpzdxKjIm1C2NQRwpo0zJyWT8A5jiHkxytfaDAuhJ1y78xed7HkTuQoAl16YlV5v05k2kKYlVjjMq4HfFLs13CyxDnJUuEAW+2W1xfqqVL81uM=" # DOCKER_PASS
+  - COMMIT=${TRAVIS_COMMIT::8}
+  - CGO_ENABLED=0
+install: go get -u
+script: go build
+after_success:
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+  - export REPO=boincnext/boinc-client-rest-server
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  - docker build -f Dockerfile -t $REPO:$COMMIT .
+  - docker tag $REPO:$COMMIT $REPO:$TAG
+  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - docker push $REPO
